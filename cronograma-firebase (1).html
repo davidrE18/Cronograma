@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cronograma 2 Semanas</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@700;800&display=swap');
+
+  :root {
+    --bg: #0f0f11;
+    --surface: #18181d;
+    --border: #2a2a32;
+    --accent: #c8f55a;
+    --accent2: #5af5c8;
+    --text: #e8e8f0;
+    --muted: #6b6b80;
+    --s1: #ff6b6b;
+    --s2: #ffd93d;
+    --s3: #6bcbff;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Mono', monospace;
+    min-height: 100vh;
+    padding: 24px 16px;
+  }
+
+  header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 28px;
+  }
+
+  h1 {
+    font-family: 'Syne', sans-serif;
+    font-size: 1.8rem;
+    color: var(--accent);
+    letter-spacing: -1px;
+  }
+
+  .subtitle { color: var(--muted); font-size: .8rem; }
+
+  .status {
+    margin-left: auto;
+    font-size: .7rem;
+    color: var(--muted);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .status.connected { color: var(--accent); }
+  .status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--muted);
+  }
+  .status.connected .status-dot { background: var(--accent); animation: pulse 2s infinite; }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
+
+  .weeks { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+
+  @media(max-width: 700px) { .weeks { grid-template-columns: 1fr; } }
+
+  .week {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+
+  .week-header {
+    padding: 12px 16px;
+    font-family: 'Syne', sans-serif;
+    font-size: 1rem;
+    font-weight: 800;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+
+  .week:nth-child(1) .week-header { background: #1a1f10; color: var(--accent); }
+  .week:nth-child(2) .week-header { background: #101a1a; color: var(--accent2); }
+
+  .day {
+    border-top: 1px solid var(--border);
+    padding: 10px 14px;
+    transition: background .15s;
+  }
+
+  .day:hover { background: rgba(255,255,255,.03); }
+
+  .day-label {
+    font-size: .7rem;
+    font-weight: 500;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 6px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .add-btn {
+    background: none;
+    border: 1px dashed var(--border);
+    color: var(--muted);
+    font-family: 'DM Mono', monospace;
+    font-size: .65rem;
+    padding: 1px 6px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all .15s;
+  }
+
+  .add-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+  .tasks { display: flex; flex-direction: column; gap: 4px; }
+
+  .task {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(255,255,255,.04);
+    border-radius: 6px;
+    padding: 5px 8px;
+    border-left: 3px solid var(--border);
+    animation: fadeIn .2s ease;
+  }
+
+  @keyframes fadeIn { from { opacity:0; transform:translateY(-4px); } to { opacity:1; transform:none; } }
+
+  .task[data-p="1"] { border-left-color: var(--s1); }
+  .task[data-p="2"] { border-left-color: var(--s2); }
+  .task[data-p="3"] { border-left-color: var(--s3); }
+
+  .task-check {
+    width: 14px; height: 14px;
+    border-radius: 3px;
+    border: 1.5px solid var(--border);
+    cursor: pointer;
+    flex-shrink: 0;
+    accent-color: var(--accent);
+  }
+
+  .task-text {
+    flex: 1;
+    background: none;
+    border: none;
+    color: var(--text);
+    font-family: 'DM Mono', monospace;
+    font-size: .8rem;
+    outline: none;
+    min-width: 0;
+  }
+
+  .task-text.done { text-decoration: line-through; color: var(--muted); }
+
+  .task-prio {
+    background: none;
+    border: none;
+    font-size: .75rem;
+    cursor: pointer;
+    padding: 0 2px;
+    opacity: .6;
+    transition: opacity .1s;
+  }
+
+  .task-prio:hover { opacity: 1; }
+
+  .del-btn {
+    background: none;
+    border: none;
+    color: var(--muted);
+    cursor: pointer;
+    font-size: .9rem;
+    line-height: 1;
+    opacity: 0;
+    transition: opacity .15s;
+  }
+
+  .task:hover .del-btn { opacity: 1; }
+
+  .legend {
+    display: flex;
+    gap: 12px;
+    margin-top: 20px;
+    font-size: .7rem;
+    color: var(--muted);
+    flex-wrap: wrap;
+  }
+
+  .legend span { display: flex; align-items: center; gap: 5px; }
+  .dot { width: 8px; height: 8px; border-radius: 2px; }
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <h1>CRONOGRAMA</h1>
+    <div class="subtitle">2 semanas · sincronizado · edición compartida</div>
+  </div>
+  <div class="status" id="status">
+    <span class="status-dot"></span>
+    <span>Conectando...</span>
+  </div>
+</header>
+
+<div class="weeks" id="board"></div>
+
+<div class="legend">
+  <span><span class="dot" style="background:var(--s1)"></span>Alta prioridad</span>
+  <span><span class="dot" style="background:var(--s2)"></span>Media</span>
+  <span><span class="dot" style="background:var(--s3)"></span>Baja</span>
+  <span><span class="dot" style="background:var(--border)"></span>Sin prioridad</span>
+</div>
+
+<!-- Firebase SDK -->
+<script type="module">
+  // IMPORTANTE: Reemplaza estos valores con tu configuración de Firebase
+  import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+  import { getDatabase, ref, onValue, set, push, remove, update } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js';
+
+  // 🔥 CONFIGURACIÓN DE FIREBASE - REEMPLAZA CON TUS VALORES
+const firebaseConfig = {
+  apiKey: "AIzaSyAOqkIrNIKMGRwzdcL8HUwZBvZzc1O86bE",
+  authDomain: "cronograma-d3f90.firebaseapp.com",
+  databaseURL: "https://cronograma-d3f90-default-rtdb.firebaseio.com",
+  projectId: "cronograma-d3f90",
+  storageBucket: "cronograma-d3f90.firebasestorage.app",
+  messagingSenderId: "440919425421",
+  appId: "1:440919425421:web:67c94d0aad637bed27fdc4"
+};
+
+  const app = initializeApp(firebaseConfig);
+  const db = getDatabase(app);
+  const DAYS = 14;
+  const PRIOICONS = ['⚪','🔴','🟡','🔵'];
+
+  let localCache = {};
+  let updateTimers = {};
+
+  // Actualizar estado de conexión
+  const statusEl = document.getElementById('status');
+  statusEl.classList.add('connected');
+  statusEl.querySelector('span:last-child').textContent = 'Conectado';
+
+  function buildBoard() {
+    const board = document.getElementById('board');
+    board.innerHTML = '';
+
+    for (let w = 0; w < 2; w++) {
+      const week = document.createElement('div');
+      week.className = 'week';
+      week.innerHTML = `<div class="week-header">Semana ${w+1}</div>`;
+
+      for (let d = 1; d <= 7; d++) {
+        const dayNum = w * 7 + d;
+        const key = `d${dayNum}`;
+
+        const dayEl = document.createElement('div');
+        dayEl.className = 'day';
+        dayEl.innerHTML = `
+          <div class="day-label">
+            <span>Día ${dayNum}</span>
+            <button class="add-btn" onclick="window.addTask('${key}')">+ tarea</button>
+          </div>
+          <div class="tasks" id="${key}"></div>`;
+        week.appendChild(dayEl);
+      }
+
+      board.appendChild(week);
+    }
+  }
+
+  function renderTasks(key, tasks) {
+    const container = document.getElementById(key);
+    if (!container) return;
+    container.innerHTML = '';
+    
+    if (!tasks) return;
+
+    Object.entries(tasks).forEach(([taskId, task]) => {
+      const el = document.createElement('div');
+      el.className = 'task';
+      el.dataset.p = task.p || 0;
+      el.innerHTML = `
+        <input type="checkbox" class="task-check" ${task.done?'checked':''} onchange="window.toggleDone('${key}','${taskId}',this)">
+        <input type="text" class="task-text ${task.done?'done':''}" value="${escHtml(task.text)}" 
+          oninput="window.editTask('${key}','${taskId}',this.value)" 
+          onkeydown="if(event.key==='Enter')window.addTask('${key}')">
+        <button class="task-prio" title="Cambiar prioridad" onclick="window.cyclePrio('${key}','${taskId}')">${PRIOICONS[task.p||0]}</button>
+        <button class="del-btn" onclick="window.delTask('${key}','${taskId}')" title="Eliminar">×</button>`;
+      container.appendChild(el);
+    });
+  }
+
+  function escHtml(s) { return (s||'').replace(/"/g,'&quot;'); }
+
+  // Escuchar cambios en tiempo real
+  for (let i = 1; i <= DAYS; i++) {
+    const key = `d${i}`;
+    const dayRef = ref(db, `cronograma/${key}`);
+    
+    onValue(dayRef, (snapshot) => {
+      const tasks = snapshot.val();
+      localCache[key] = tasks;
+      renderTasks(key, tasks);
+    });
+  }
+
+  // Funciones globales
+  window.addTask = async function(key) {
+    const dayRef = ref(db, `cronograma/${key}`);
+    const newTaskRef = push(dayRef);
+    await set(newTaskRef, { text: '', done: false, p: 0 });
+  };
+
+  window.editTask = function(key, taskId, val) {
+    // Actualizar cache local inmediatamente (sin lag visual)
+    if (!localCache[key]) localCache[key] = {};
+    if (!localCache[key][taskId]) localCache[key][taskId] = {};
+    localCache[key][taskId].text = val;
+
+    // Cancelar timer anterior
+    const timerId = `${key}-${taskId}`;
+    if (updateTimers[timerId]) {
+      clearTimeout(updateTimers[timerId]);
+    }
+
+    // Actualizar Firebase después de 500ms sin escribir
+    updateTimers[timerId] = setTimeout(async () => {
+      const taskRef = ref(db, `cronograma/${key}/${taskId}`);
+      await update(taskRef, { text: val });
+    }, 500);
+  };
+
+  window.toggleDone = async function(key, taskId, el) {
+    const taskRef = ref(db, `cronograma/${key}/${taskId}`);
+    await update(taskRef, { done: el.checked });
+  };
+
+  window.cyclePrio = async function(key, taskId) {
+    const task = localCache[key]?.[taskId];
+    if (!task) return;
+    const newPrio = ((task.p || 0) + 1) % 4;
+    const taskRef = ref(db, `cronograma/${key}/${taskId}`);
+    await update(taskRef, { p: newPrio });
+  };
+
+  window.delTask = async function(key, taskId) {
+    const taskRef = ref(db, `cronograma/${key}/${taskId}`);
+    await remove(taskRef);
+  };
+
+  buildBoard();
+</script>
+</body>
+</html>
